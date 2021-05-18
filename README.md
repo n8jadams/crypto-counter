@@ -1,0 +1,38 @@
+# CryptoCounter
+A little PWA that helps you track your cryptocurrency portfolio with the help of the Coingecko API.
+
+NOTE: This is just a fun little side project to help me learn how to write buildless preact sites, dexie.js, and some of the nuances of iOS Safari and PWAs.
+
+## Requirements
+1. Node
+2. `ngrok` or some other way to pipe a localhost port to the WWW
+3. A phone
+
+## Setup
+1. Run the install script which is also the build script. We're manually using preact with xstate, so ignore react resolving errors.
+```bash
+$ yarn
+```
+2. Start the script
+```bash
+$ yarn prod # slow-loading, but minified and cached assets
+```
+3. In a different terminal, pipe port 8081 to `ngrok` or something else
+```bash
+$ ngrok http 8081
+```
+4. Grab the public https url of the site and download like you would any other PWA.
+	* On iOS: Open the page, expand the options, and click "Add to Home Screen"
+	* On Android: ??
+5. Open and close the newly added app a couple times on your phone.
+6. You can kill all of the scripts, everything is in place for the app to work offline.
+
+## Development
+```bash
+$ yarn dev
+```
+
+## Todos
+[] Add Android install instructions to the README
+[] Add sorting by total vs by market cap of coin
+[] Better design

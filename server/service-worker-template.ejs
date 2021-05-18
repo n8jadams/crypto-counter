@@ -1,0 +1,34 @@
+const CACHE_NAME = '<%= cacheName %>'
+
+self.addEventListener('install', (event) => {
+	event.waitUntil(
+		caches.open(CACHE_NAME).then((cache) => {
+			return cache.addAll(['/', '/index.html', '/service-worker.js', <%- staticFiles.map((f) => `'${f}'`) %>])
+		})
+	)
+})
+
+self.addEventListener('fetch', (event) => {
+	event.respondWith(caches.match(event.request).then((response) => {
+		if (response !== undefined) {
+			return response
+		} else {
+			return fetch(event.request, {
+				method: 'GET',
+				mode: 'cors',
+				cache: 'no-cache',
+				redirect: 'follow',
+				referrerPolicy: 'no-referrer',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+			}).then((response) => {
+				const responseClone = response.clone()
+				caches.open(CACHE_NAME).then((cache) => {
+					cache.put(event.request, responseClone)
+				})
+				return response
+			}).catch(() => {})
+		}
+	}))
+})
