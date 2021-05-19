@@ -1,7 +1,4 @@
 const fs = require('fs').promises
-const path = require('path')
-const UglifyJS = require('uglify-js')
-const CleanCSS = require('clean-css')
 
 async function getFileContents(filePath, encoding = 'utf8') {
 	try {

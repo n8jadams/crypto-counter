@@ -13,7 +13,7 @@
 	<title>CryptoCounter</title>
 </head>
 <body>
-	<% if(process.env.ENV === 'production') { %><script type="module" src="service-worker.js"></script><% } %>
+	<% if(process.env.ENV === 'production') { %><script type="module" src="use-service-worker.js"></script><% } %>
 	<script type="module" src="index.js"></script>
 </body>
 </html>
