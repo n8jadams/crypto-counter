@@ -15,7 +15,7 @@ $ yarn
 ```
 2. Start the script
 ```bash
-$ yarn prod # slow-loading, but minified and cached assets
+$ yarn dev # or yarn prod for minified assets
 ```
 3. In a different terminal, pipe port 8081 to `ngrok` or something else
 ```bash
@@ -33,6 +33,6 @@ $ yarn dev
 ```
 
 ## Todos
-[] Add Android install instructions to the README
-[] Add sorting by total vs by market cap of coin
-[] Better design
+- [x] Separate development from prod
+- [ ] Add Android install instructions to the README
+- [ ] Better design
