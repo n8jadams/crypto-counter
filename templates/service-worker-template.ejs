@@ -1,9 +1,10 @@
 const CACHE_NAME = '<%= cacheName %>'
+const FILES_TO_CACHE = ['/', '/index.html', '/service-worker.js', <%- staticFiles.map((f) => `'${f}'`) %>]
 
 self.addEventListener('install', (event) => {
 	event.waitUntil(
 		caches.open(CACHE_NAME).then((cache) => {
-			return cache.addAll(['/', '/index.html', '/service-worker.js', <%- staticFiles.map((f) => `'${f}'`) %>])
+			return cache.addAll(FILES_TO_CACHE)
 		})
 	)
 })
@@ -25,7 +26,9 @@ self.addEventListener('fetch', (event) => {
 			}).then((response) => {
 				const responseClone = response.clone()
 				caches.open(CACHE_NAME).then((cache) => {
-					cache.put(event.request, responseClone)
+					if(FILES_TO_CACHE.includes(event.request.url)) {
+						cache.put(event.request, responseClone)
+					}
 				})
 				return response
 			}).catch(() => {})
