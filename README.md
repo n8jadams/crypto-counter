@@ -22,10 +22,9 @@ $ yarn dev # or yarn prod for minified assets
 $ ngrok http 8081
 ```
 4. Grab the public https url of the site and download like you would any other PWA.
-	* On iOS: Open the page, expand the options, and click "Add to Home Screen"
+	* On iOS: Open the page, expand the options, and click "Add to Home Screen". Open and close the newly added app a couple times on your phone.
 	* On Android: ??
-5. Open and close the newly added app a couple times on your phone.
-6. You can kill all of the scripts, everything is in place for the app to work offline.
+5. You can kill all of the scripts, everything is in place for the app to work offline.
 
 ## Development
 ```bash
@@ -34,5 +33,6 @@ $ yarn dev
 
 ## Todos
 - [x] Separate development from prod
+- [ ] Sort table by market cap or by price
 - [ ] Add Android install instructions to the README
 - [ ] Better design
