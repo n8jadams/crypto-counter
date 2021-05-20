@@ -1,7 +1,7 @@
 import { html } from '../web_modules/htm/preact.js'
 import { useRef, useEffect } from '../web_modules/preact/hooks.js'
 
-export function QuantityInput({ onSaveNew, onInput, value, disabled }) {
+export function NumberInput({ onSaveNew, onInput, value, disabled }) {
 	const inputElRef = useRef()
 	const caretRef = useRef()
 

@@ -9,19 +9,20 @@ export const FETCH_PRICES = 'FETCH_PRICES'
 export const CLEAR_ERRORS = 'CLEAR_ERRORS'
 
 const initialNewTableRow = {
+  marketcap: '?',
   key: '',
-  name: '',
+  symbol: '',
   quantity: 0,
-  price: 0,
+  price: '0.00',
   total: '0.00',
   error: false,
 }
 
-const initialTableValue = { finalTotal: 0, rows: [] }
+const initialTableValue = () => ({ finalTotal: 0, rows: [] })
 
 const emptyState = {
   table: {
-    ...initialTableValue,
+    ...initialTableValue(),
   },
   newRow: {
     ...initialNewTableRow,
@@ -49,7 +50,7 @@ export const cryptoCounterMachine = Machine({
               acc.rows.push(fullRow)
               acc.finalTotal = toUSD(Number(acc.finalTotal) + Number(fullRow.total))
               return acc
-            }, initialTableValue)
+            }, initialTableValue())
             return { table }
           }),
           target: 'editing',
@@ -83,11 +84,13 @@ export const cryptoCounterMachine = Machine({
                     ...mutation,
                   }
                 }
+                row.key = row.key.toLowerCase()
+                row.symbol = row.symbol.toUpperCase()
                 row.total = toUSD(Number(row.quantity) * Number(row.price))
                 acc.rows.push(row)
                 acc.finalTotal = toUSD(Number(acc.finalTotal + row.total))
                 return acc
-              }, initialTableValue)
+              }, initialTableValue())
               return { table, fetchPricesError: false }
             }),
             'saveDatabase',
@@ -106,6 +109,8 @@ export const cryptoCounterMachine = Machine({
             actions: assign(({ newRow }) => ({
               newRow: {
                 ...newRow,
+                key: newRow.key.toLowerCase(),
+                symbol: newRow.symbol.toUpperCase(),
                 error: 'Invalid form',
               },
             })),
@@ -160,21 +165,24 @@ export const cryptoCounterMachine = Machine({
             assign((context, event) => {
               const table = context.table.rows.reduce((acc, row) => {
                 let newPrice = 0
+                let newMarketcap = '?'
                 if (
                   event.data[row.key] &&
                   !isNaN(Number(event.data[row.key].usd))
                 ) {
                   newPrice = event.data[row.key].usd
+                  newMarketcap = Number(toUSD(event.data[row.key].usd_market_cap)).toLocaleString('en')
                 }
                 const adjustedRow = {
                   ...row,
                   price: newPrice,
+                  marketcap: newMarketcap,
                   total: toUSD(Number(row.quantity) * Number(newPrice))
                 }
                 acc.rows.push(adjustedRow)
                 acc.finalTotal = toUSD(Number(acc.finalTotal) + Number(adjustedRow.total))
                 return acc
-              }, initialTableValue)
+              }, initialTableValue())
               return { table }
             }),
             'saveDatabase',

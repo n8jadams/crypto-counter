@@ -1,11 +1,10 @@
 const fs = require('fs').promises
 const path = require('path')
 const fg = require('fast-glob')
-const UglifyJS = require('uglify-js')
 const CleanCSS = require('clean-css')
 const ejs = require('ejs')
 
-const { getFileContents } = require('./node-utils.js')
+const { getFileContents, minifyJs } = require('./node-utils.js')
 
 const STATIC_FILE_PATH = path.resolve(__dirname, 'static')
 const DIST_FILE_PATH = path.resolve(__dirname, 'dist')
@@ -24,7 +23,7 @@ const DIST_FILE_PATH = path.resolve(__dirname, 'dist')
             .replace(STATIC_FILE_PATH, DIST_FILE_PATH)
           await fs.mkdir(directory, { recursive: true })
           const contents = await getFileContents(file)
-          const minifiedJs = UglifyJS.minify(contents).code
+          const minifiedJs = minifyJs(contents)
           await fs.writeFile(
             file.replace(STATIC_FILE_PATH, DIST_FILE_PATH),
             minifiedJs,
@@ -89,7 +88,7 @@ const DIST_FILE_PATH = path.resolve(__dirname, 'dist')
 			cacheName: 'v1',
 			staticFiles
 		})
-		const minifiedWorkerCode = UglifyJS.minify(serviceWorkerCode).code
+		const minifiedWorkerCode = minifyJs(serviceWorkerCode)
 		await fs.writeFile(path.resolve(DIST_FILE_PATH, 'service-worker.js'), minifiedWorkerCode)
 
 		console.log('Done building!')

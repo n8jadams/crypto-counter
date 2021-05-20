@@ -16,14 +16,14 @@ import {
 
 import { toUSD } from './utils/to-usd.js'
 import { KeyInput } from './components/key-input.js'
-import { NameInput } from './components/name-input.js'
-import { QuantityInput } from './components/quantity-input.js'
+import { SymbolInput } from './components/symbol-input.js'
+import { NumberInput } from './components/number-input.js'
 import { PriceInput } from './components/price-input.js'
 import { RefreshIconSvg } from './components/refresh-icon-svg.js'
 
 const styles = css`
   * {
-    font-size: 13px;
+    font-size: 10px;
   }
 
 	h1 {
@@ -53,16 +53,24 @@ const styles = css`
     font-family: "Avenir Next Condensed", sans-serif;
   }
 
-  .key-input input {
-    width: 65px;
+  .marketcap-input input {
+    width: 68px;
   }
 
-  .name-input input {
-    width: 35px;
+  .key-text {
+    margin-left: 5px;
+  }
+
+  .key-input input {
+    width: 50px;
+  }
+
+  .symbol-input input {
+    width: 40px;
   }
 
   .quantity-input input {
-    width: 60px;
+    width: 40px;
   }
 
   .price-input input {
@@ -143,7 +151,21 @@ const styles = css`
     transform: translateY(2px) scale(1.1);
   }
 
-  @media(min-width: 500px) {
+  @media(min-width: 400px) {
+    * {
+      font-size: 13px;
+    }
+
+    .key-text {
+      margin-left: 0;
+    }
+  }
+
+  @media(min-width: 630px) {
+    table {
+      max-width: 630px;
+    }
+
     * {
       font-size: medium;
     }
@@ -163,7 +185,7 @@ const styles = css`
       width: 90px;
     }
     
-    .name-input input {
+    .symbol-input input {
       width: 90px;
     }
 
@@ -176,7 +198,7 @@ const styles = css`
     }
   }
 
-  @media(min-width: 700px) {
+  @media(min-width: 865px) {
     table th,
     table td {
       padding: 12px 15px;
@@ -186,7 +208,7 @@ const styles = css`
       width: 110px;
     }
 
-    .name-input input {
+    .symbol-input input {
       width: 110px;
     }
 
@@ -204,13 +226,13 @@ export function CryptoCounter() {
   const [state, send] = useMachine(cryptoCounterMachine, {
     services: {
       ['importDatabase']: async () => {
-        const fullDbTable = await db.cryptos.toArray()
+        const fullDbTable = await db.getAll()
         return fullDbTable
       },
       ['loadPrices']: async ({ table }) => {
         const keysList = table.rows.map(({ key }) => key).join('%2C')
         const response = await fetch(
-          `https://api.coingecko.com/api/v3/simple/price?ids=${keysList}&vs_currencies=usd`
+          `https://api.coingecko.com/api/v3/simple/price?ids=${keysList}&vs_currencies=usd&include_market_cap=true`
         )
         const body = await response.json()
         return body
@@ -218,16 +240,17 @@ export function CryptoCounter() {
     },
     actions: {
       ['saveDatabase']: async ({ table }) => {
-        const bulkPutQuery = table.rows.map(({ key, name, quantity, price }) => {
+        const bulkPutQuery = table.rows.map(({ key, marketcap, symbol, quantity, price }) => {
           return {
             key,
-            name,
+            marketcap,
+            symbol,
             quantity,
             price
           }
         })
-        await db.cryptos.clear()
-        await db.cryptos.bulkPut(bulkPutQuery)
+        await db.clear()
+        await db.bulkPut(bulkPutQuery)
       }
     }
   })
@@ -258,8 +281,9 @@ export function CryptoCounter() {
       <table>
         <thead>
           <tr>
+            <th>Market Cap</th>
             <th>Key</th>
-            <th>Name</th>
+            <th>Symbol</th>
             <th>Quantity</th>
             <th>
             <div className="button-wrapper">
@@ -286,27 +310,31 @@ export function CryptoCounter() {
           table.rows.map(
             ({
               key,
-              name,
+              marketcap,
+              symbol,
               quantity,
               price,
               total
             }) => {
               return html`
                 <tr key=${key}>
-                  <td className="key-row">${key}</td>
-                  <td className="name-input">
-                    <${NameInput}
-                      onInput=${(newName) => {
+                  <td className="marketcap-input">${marketcap}</td>
+                  <td className="key-row">
+                    <span className="key-text">${key}</span>
+                  </td>
+                  <td className="symbol-input">
+                    <${SymbolInput}
+                      onInput=${(newSymbol) => {
                         send({
                           type: UPDATE_ROW,
-                          mutation: { key, name: newName },
+                          mutation: { key, symbol: newSymbol },
                         })
                       }}
-                      value=${name}
+                      value=${symbol}
                     />
                   </td>
                   <td className="quantity-input">
-                    <${QuantityInput}
+                    <${NumberInput}
                       onInput=${(newQuantity) => {
                         send({
                           type: UPDATE_ROW,
@@ -349,8 +377,8 @@ export function CryptoCounter() {
           ${!!fetchPricesError &&
           html`
             <tr>
-              <td colspan="2">${fetchPricesError}</td>
-              <td colspan="1">
+              <td colspan="4">${fetchPricesError}</td>
+              <td>
                 <div className="button-wrapper">
                   <button
                     className="clear-button"
@@ -360,7 +388,7 @@ export function CryptoCounter() {
                   >Clear</button>
                 </div>
               </td>
-              <td colspan="5" />
+              <td colspan="2" />
             </tr>
           `}
           ${table &&
@@ -372,6 +400,7 @@ export function CryptoCounter() {
             </tr>
           `}
           <tr>
+            <td>${newRow.marketcap}</td>
             <td className="key-input">
               <${KeyInput}
                 ref=${keyInputElRef}
@@ -385,18 +414,18 @@ export function CryptoCounter() {
                 autoFocus
               />
             </td>
-            <td className="name-input">
-              <${NameInput}
+            <td className="symbol-input">
+              <${SymbolInput}
                 onSaveNew=${handleSaveNew}
-                onInput=${(newName) => {
-                  send({ type: EDIT_NEW_ROW, mutation: { name: newName } })
+                onInput=${(newSymbol) => {
+                  send({ type: EDIT_NEW_ROW, mutation: { symbol: newSymbol } })
                 }}
-                value=${newRow.name}
+                value=${newRow.symbol}
                 disabled=${loading}
               />
             </td>
             <td className="quantity-input">
-              <${QuantityInput}
+              <${NumberInput}
                 className="quantity-input"
                 onSaveNew=${handleSaveNew}
                 onInput=${(newQuantity) => {
@@ -409,19 +438,7 @@ export function CryptoCounter() {
                 disabled=${loading}
               />
             </td>
-            <td className="price-input">
-              <${PriceInput}
-                onSaveNew=${handleSaveNew}
-                onInput=${(newPrice) => {
-                  send({
-                    type: EDIT_NEW_ROW,
-                    mutation: { price: newPrice },
-                  })
-                }}
-                value=${newRow.price}
-                disabled=${loading}
-              />
-            </td>
+            <td className="price-input">$${newRow.price}</td>
             <td>$${newRow.total}</td>
             <td>
               <div className="button-wrapper">
@@ -436,8 +453,8 @@ export function CryptoCounter() {
           ${!!newRow.error &&
           html`
             <tr>
-              <td colspan="2">${newRow.error}</td>
-              <td colspan="1">
+              <td colspan="4">${newRow.error}</td>
+              <td>
                 <div className="button-wrapper">
                   <button
                     className="clear-button"
@@ -447,12 +464,12 @@ export function CryptoCounter() {
                   >Clear</button>
                 </div>
               </td>
-              <td colspan="5" />
+              <td colspan="2" />
             </tr>
           `}
           <tr>
-            <td colSpan="4"></td>
-            <td>$${toUSD(Number(table.finalTotal) + Number(newRow.total))}</td>
+            <td colSpan="5"></td>
+            <td>$${toUSD(Number(table.finalTotal))}</td>
             <td />
           </tr>
         </tbody>

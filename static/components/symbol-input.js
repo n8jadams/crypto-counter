@@ -1,12 +1,19 @@
 import { html } from '../web_modules/htm/preact.js'
+import css from '../web_modules/csz.js'
 
-export function NameInput({ onSaveNew, onInput, value, disabled }) {
+const styles = css`
+	input {
+		text-transform: uppercase;
+	}
+`
+
+export function SymbolInput({ onSaveNew, onInput, value, disabled }) {
 	if(!onSaveNew) {
 		onSaveNew = (e) => { e.preventDefault() }
 	}
 
 	return html`
-		<form onSubmit=${onSaveNew}>
+		<form onSubmit=${onSaveNew} className=${styles}>
 			<input
 				type="text"
 				autocapitalize="characters"

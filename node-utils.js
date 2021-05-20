@@ -1,4 +1,5 @@
 const fs = require('fs').promises
+const UglifyJS = require('uglify-js')
 
 async function getFileContents(filePath, encoding = 'utf8') {
 	try {
@@ -20,7 +21,13 @@ async function readGlobsFromFile(filename) {
 		.filter(Boolean)
 }
 
+function minifyJs(fullJsCode) {
+	const minifiedCode = UglifyJS.minify(fullJsCode).code.split('<').map(p => p.trim()).join('<').split('>').map(p => p.trim()).join('>').replace(/\s+/gm, ' ').replace(/\n/, ' ')
+	return minifiedCode
+}
+
 module.exports = {
 	getFileContents,
 	readGlobsFromFile,
+	minifyJs
 }
