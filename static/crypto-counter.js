@@ -155,17 +155,9 @@ const styles = css`
     * {
       font-size: 13px;
     }
-
-    .key-text {
-      margin-left: 0;
-    }
   }
 
-  @media(min-width: 630px) {
-    table {
-      max-width: 630px;
-    }
-
+  @media(min-width: 750px) {
     * {
       font-size: medium;
     }
@@ -179,6 +171,10 @@ const styles = css`
   
     input {
       font-family: "Avenir Next", sans-serif;
+    }
+
+    .marketcap-input {
+      width: 100px;
     }
 
     .key-input input  {
@@ -198,10 +194,18 @@ const styles = css`
     }
   }
 
-  @media(min-width: 865px) {
+  @media(min-width: 950px) {
+    table {
+      max-width: 1000px;
+    }
+
     table th,
     table td {
       padding: 12px 15px;
+    }
+
+    .key-text {
+      margin-left: 0;
     }
 
     .key-input input  {
@@ -400,7 +404,7 @@ export function CryptoCounter() {
             </tr>
           `}
           <tr>
-            <td>${newRow.marketcap}</td>
+            <td className="marketcap-input">${newRow.marketcap}</td>
             <td className="key-input">
               <${KeyInput}
                 ref=${keyInputElRef}

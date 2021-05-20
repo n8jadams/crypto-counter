@@ -33,7 +33,7 @@ fastify.register(fastifyStatic, {
 
 const start = async () => {
 	try {
-		await fastify.listen(8081)
+		await fastify.listen(8082)
 	} catch (err) {
 		fastify.log.error(err)
 		process.exit(1)
