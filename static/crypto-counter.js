@@ -267,7 +267,7 @@ export function CryptoCounter() {
       if(keyInputElRef.current) {
         keyInputElRef.current.focus()
       }
-    }, 100)
+    }, 5)
     return () => {
       clearTimeout(to)
     }

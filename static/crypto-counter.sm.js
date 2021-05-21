@@ -27,7 +27,7 @@ const emptyState = {
   newRow: {
     ...initialNewTableRow,
   },
-  fetchPricesError: false,
+  fetchPricesError: false
 }
 
 export const cryptoCounterMachine = Machine({
@@ -83,12 +83,12 @@ export const cryptoCounterMachine = Machine({
                     ...row,
                     ...mutation,
                   }
+                  row.key = row.key.toLowerCase()
+                  row.symbol = row.symbol.toUpperCase()
+                  row.total = toUSD(Number(row.quantity) * Number(row.price))
                 }
-                row.key = row.key.toLowerCase()
-                row.symbol = row.symbol.toUpperCase()
-                row.total = toUSD(Number(row.quantity) * Number(row.price))
                 acc.rows.push(row)
-                acc.finalTotal = toUSD(Number(acc.finalTotal + row.total))
+                acc.finalTotal = toUSD(Number(acc.finalTotal) + Number(row.total))
                 return acc
               }, initialTableValue())
               return { table, fetchPricesError: false }
