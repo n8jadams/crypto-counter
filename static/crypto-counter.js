@@ -11,10 +11,13 @@ import {
   ADD_ROW,
   DELETE_ROW,
   FETCH_PRICES,
-  CLEAR_ERRORS
+  CLEAR_ERRORS,
+  EXPORT_TABLE,
+  IMPORT_TABLE
 } from './crypto-counter.sm.js'
 
 import { toUSD } from './utils/to-usd.js'
+import { downloadObjectAsJSONFile } from './utils/download-object-as-json-file.js'
 import { KeyInput } from './components/key-input.js'
 import { SymbolInput } from './components/symbol-input.js'
 import { NumberInput } from './components/number-input.js'
@@ -224,12 +227,23 @@ const styles = css`
       width: 75px;
     }
   }
+
+  .other-utilities-section {
+    margin-top: 20px;
+    display: flex;
+  }
+
+  .hidden-file-input {
+    height: 0px;
+    width: 0px;
+    overflow:hidden;
+  }
 `
 
 export function CryptoCounter() {
   const [state, send] = useMachine(cryptoCounterMachine, {
     services: {
-      ['importDatabase']: async () => {
+      ['loadDatabase']: async () => {
         const fullDbTable = await db.getAll()
         return fullDbTable
       },
@@ -255,12 +269,33 @@ export function CryptoCounter() {
         })
         await db.clear()
         await db.bulkPut(bulkPutQuery)
+      },
+      ['exportTable']: async ({ table }) => {
+        const filteredRows = table.rows.map(row => {
+          return {
+            key: row.key,
+            marketcap: Number(row.marketcap.replace(/,|\?/g, '')),
+            symbol: row.symbol,
+            quantity: Number(row.quantity),
+            price: Number(row.price)
+          }
+        })
+        const now = new Date
+        const seconds = now.getSeconds()
+        const milliseconds = now.getMilliseconds()
+        const month = now.getMonth() + 1
+        const calendarDate = now.getDate()
+        const year = now.getFullYear()
+        const timeStamp = new Intl.DateTimeFormat('en-US', { timeStyle: 'short', hour12: false }).format(new Date).replace(':', '-')
+        const fullTimestamp = `${year}-${month}-${calendarDate}-${timeStamp}-${seconds}-${milliseconds}`
+        await downloadObjectAsJSONFile(filteredRows, `cryptocounter-table-${fullTimestamp}`)
       }
     }
   })
   const { table, newRow, fetchPricesError } = state.context
   const loading = state.matches('loadingPrices')
   const keyInputElRef = useRef()
+  const importTableBtnElRef = useRef()
 
   useEffect(() => {
     const to = setTimeout(() => {
@@ -286,7 +321,9 @@ export function CryptoCounter() {
         <thead>
           <tr>
             <th>Market Cap</th>
-            <th>Key</th>
+            <th>
+              <span className="key-text">Key</span>
+            </th>
             <th>Symbol</th>
             <th>Quantity</th>
             <th>
@@ -478,6 +515,83 @@ export function CryptoCounter() {
           </tr>
         </tbody>
       </table>
+      <div className="other-utilities-section">
+        <table>
+          <thead>
+            <tr>
+              <th colSpan="3">Other Utilities</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div className="button-wrapper">
+                  <button onClick=${() => {
+                    importTableBtnElRef.current.click()
+                  }}>
+                    Import Table
+                  </button>
+                </div>
+                <div className="hidden-file-input">
+                  <input
+                    ref=${importTableBtnElRef}
+                    type="file"
+                    value="upload"
+                    onChange=${(event) => {
+                      event.preventDefault()
+                      const file = event.target.files[0]
+                      const reader = new FileReader()
+                      reader.readAsText(file)
+                      reader.onload = () => {
+                        try {
+                          const rowsMinusTotals = JSON.parse(reader.result)
+                          const isArray = Array.isArray(rowsMinusTotals)
+                          if(!isArray) {
+                            throw new Error()
+                          }
+                          rowsMinusTotals.forEach(rowMinusTotal => {
+                            const hasAllKeys = ['key', 'marketcap', 'symbol', 'quantity', 'price'].every(requiredKey => {
+                              return rowMinusTotal[requiredKey] !== undefined
+                            })
+                            if(!hasAllKeys) {
+                              throw new Error()
+                            }
+                            const hasExpectedNumericalValues = ['marketcap', 'quantity', 'price'].every(k => {
+                              return !isNaN(rowMinusTotal[k])
+                            })
+                            if(!hasExpectedNumericalValues) {
+                              throw new Error()
+                            }
+                          })
+                          send({ type: IMPORT_TABLE, rowsMinusTotals })
+                        } catch(e) {
+                          throw new Error('Invalid table upload! Bad format')
+                        }
+                      }
+                      reader.onerror = () => {
+                        throw new Error(`Invalid table upload! - ${reader.error}`)
+                      }
+                    }}
+                    accept=".json"
+                  />
+                </div>
+              </td>
+              <td />
+              <td>
+                <div className="button-wrapper">
+                  <button
+                    onClick=${() => {
+                      send(EXPORT_TABLE)
+                    }}
+                  >
+                  <div>Export Table</div>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   `
 }

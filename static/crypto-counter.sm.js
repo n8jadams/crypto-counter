@@ -7,6 +7,8 @@ export const ADD_ROW = 'ADD_ROW'
 export const DELETE_ROW = 'DELETE_ROW'
 export const FETCH_PRICES = 'FETCH_PRICES'
 export const CLEAR_ERRORS = 'CLEAR_ERRORS'
+export const EXPORT_TABLE = 'EXPORT_TABLE'
+export const IMPORT_TABLE = 'IMPORT_TABLE'
 
 const initialNewTableRow = {
   marketcap: '?',
@@ -39,7 +41,7 @@ export const cryptoCounterMachine = Machine({
   states: {
     initial: {
       invoke: {
-        src: 'importDatabase',
+        src: 'loadDatabase',
         onDone: {
           actions: assign((_, event) => {
             const table = event.data.reduce((acc, row) => {
@@ -208,6 +210,27 @@ export const cryptoCounterMachine = Machine({
           fetchPricesError: false
         }
       })
+    },
+    [EXPORT_TABLE]: {
+      actions: 'exportTable'
+    },
+    [IMPORT_TABLE]: {
+      actions: [
+        assign((_, { rowsMinusTotals }) => {
+          const table = rowsMinusTotals.reduce((acc, row) => {
+            const fullRow = {
+              ...row,
+              marketcap: row.marketcap === 0 ? '?' : Number(toUSD(row.marketcap)).toLocaleString('en'),
+              total: toUSD(Number(row.quantity) * Number(row.price)),
+            }
+            acc.rows.push(fullRow)
+            acc.finalTotal = toUSD(Number(acc.finalTotal) + Number(fullRow.total))
+            return acc
+          }, initialTableValue())
+          return { table }
+        }),
+        'saveDatabase'
+      ]
     }
   }
 })
