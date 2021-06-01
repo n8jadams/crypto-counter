@@ -11,11 +11,11 @@ NOTE: This is just a fun little side project to help me learn how to write build
 ## Setup
 1. Run the install script which is also the build script. We're manually using preact with xstate, so ignore react resolving errors.
 ```bash
-$ yarn
+$ npm install
 ```
 2. Start the script
 ```bash
-$ yarn dev # or yarn prod for minified assets
+$ npm run prod # or npm run dev for development
 ```
 3. In a different terminal, pipe port 8081 to `ngrok` or something else
 ```bash
@@ -25,11 +25,6 @@ $ ngrok http 8081
 	* On iOS: Open the page, expand the options, and click "Add to Home Screen". Open and close the newly added app a couple times on your phone.
 	* On Android: ??
 5. You can kill all of the scripts, everything is in place for the app to work offline.
-
-## Development
-```bash
-$ yarn dev
-```
 
 ## Todos
 - [x] Separate development from prod
