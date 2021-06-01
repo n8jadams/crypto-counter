@@ -23,6 +23,7 @@ import { SymbolInput } from './components/symbol-input.js'
 import { NumberInput } from './components/number-input.js'
 import { PriceInput } from './components/price-input.js'
 import { RefreshIconSvg } from './components/refresh-icon-svg.js'
+import { LastUpdated } from './components/last-updated.js'
 
 const styles = css`
   * {
@@ -49,15 +50,15 @@ const styles = css`
     margin: 0;
     font-family: "Avenir Next Condensed", sans-serif;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
-    max-width: 600px;
+    max-width: 648px;
   }
 
   input {
     font-family: "Avenir Next Condensed", sans-serif;
   }
 
-  .marketcap-input input {
-    width: 68px;
+  .marketcap-column {
+    text-align: right;
   }
 
   .key-text {
@@ -176,7 +177,7 @@ const styles = css`
       font-family: "Avenir Next", sans-serif;
     }
 
-    .marketcap-input {
+    .marketcap-column {
       width: 100px;
     }
 
@@ -238,14 +239,22 @@ const styles = css`
     width: 0px;
     overflow:hidden;
   }
+
+  .align-right {
+    text-align: right;
+  }
 `
+
+const LAST_UPDATED_LS_KEY = 'last-updated'
 
 export function CryptoCounter() {
   const [state, send] = useMachine(cryptoCounterMachine, {
     services: {
-      ['loadDatabase']: async () => {
+      ['loadData']: async () => {
         const fullDbTable = await db.getAll()
-        return fullDbTable
+        const lastUpdatedRaw = localStorage.getItem(LAST_UPDATED_LS_KEY)
+        const lastUpdated = lastUpdatedRaw ? new Date(lastUpdatedRaw) : new Date
+        return { fullDbTable, lastUpdated }
       },
       ['loadPrices']: async ({ table }) => {
         const keysList = table.rows.map(({ key }) => key).join('%2C')
@@ -253,7 +262,9 @@ export function CryptoCounter() {
           `https://api.coingecko.com/api/v3/simple/price?ids=${keysList}&vs_currencies=usd&include_market_cap=true`
         )
         const body = await response.json()
-        return body
+        const lastUpdated = new Date
+        localStorage.setItem(LAST_UPDATED_LS_KEY, lastUpdated.toJSON())
+        return { body, lastUpdated }
       }
     },
     actions: {
@@ -292,7 +303,7 @@ export function CryptoCounter() {
       }
     }
   })
-  const { table, newRow, fetchPricesError } = state.context
+  const { table, newRow, fetchPricesError, lastUpdated } = state.context
   const loading = state.matches('loadingPrices')
   const keyInputElRef = useRef()
   const importTableBtnElRef = useRef()
@@ -320,7 +331,7 @@ export function CryptoCounter() {
       <table>
         <thead>
           <tr>
-            <th>Market Cap</th>
+            <th className="marketcap-column">Market Cap</th>
             <th>
               <span className="key-text">Key</span>
             </th>
@@ -359,7 +370,7 @@ export function CryptoCounter() {
             }) => {
               return html`
                 <tr key=${key}>
-                  <td className="marketcap-input">${marketcap}</td>
+                  <td className="marketcap-column">${marketcap}</td>
                   <td className="key-row">
                     <span className="key-text">${key}</span>
                   </td>
@@ -441,7 +452,7 @@ export function CryptoCounter() {
             </tr>
           `}
           <tr>
-            <td className="marketcap-input">${newRow.marketcap}</td>
+            <td className="marketcap-column">${newRow.marketcap}</td>
             <td className="key-input">
               <${KeyInput}
                 ref=${keyInputElRef}
@@ -509,7 +520,9 @@ export function CryptoCounter() {
             </tr>
           `}
           <tr>
-            <td colSpan="5"></td>
+            <td colSpan="5" className="align-right">
+              <${LastUpdated} date=${lastUpdated} />
+            </td>
             <td>$${toUSD(Number(table.finalTotal))}</td>
             <td />
           </tr>

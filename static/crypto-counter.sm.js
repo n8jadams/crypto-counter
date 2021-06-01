@@ -29,7 +29,8 @@ const emptyState = {
   newRow: {
     ...initialNewTableRow,
   },
-  fetchPricesError: false
+  fetchPricesError: false,
+  lastUpdated: new Date
 }
 
 export const cryptoCounterMachine = Machine({
@@ -41,10 +42,11 @@ export const cryptoCounterMachine = Machine({
   states: {
     initial: {
       invoke: {
-        src: 'loadDatabase',
+        src: 'loadData',
         onDone: {
           actions: assign((_, event) => {
-            const table = event.data.reduce((acc, row) => {
+            const { fullDbTable, lastUpdated } = event.data
+            const table = fullDbTable.reduce((acc, row) => {
               const fullRow = {
                 ...row,
                 total: toUSD(Number(row.quantity) * Number(row.price)),
@@ -53,7 +55,7 @@ export const cryptoCounterMachine = Machine({
               acc.finalTotal = toUSD(Number(acc.finalTotal) + Number(fullRow.total))
               return acc
             }, initialTableValue())
-            return { table }
+            return { table, lastUpdated }
           }),
           target: 'editing',
         },
@@ -165,15 +167,16 @@ export const cryptoCounterMachine = Machine({
         onDone: {
           actions: [
             assign((context, event) => {
+              const { body, lastUpdated } = event.data
               const table = context.table.rows.reduce((acc, row) => {
                 let newPrice = 0
                 let newMarketcap = '?'
                 if (
-                  event.data[row.key] &&
-                  !isNaN(Number(event.data[row.key].usd))
+                  body[row.key] &&
+                  !isNaN(Number(body[row.key].usd))
                 ) {
-                  newPrice = event.data[row.key].usd
-                  newMarketcap = Number(toUSD(event.data[row.key].usd_market_cap)).toLocaleString('en')
+                  newPrice = body[row.key].usd
+                  newMarketcap = Number(toUSD(body[row.key].usd_market_cap)).toLocaleString('en')
                 }
                 const adjustedRow = {
                   ...row,
@@ -185,7 +188,7 @@ export const cryptoCounterMachine = Machine({
                 acc.finalTotal = toUSD(Number(acc.finalTotal) + Number(adjustedRow.total))
                 return acc
               }, initialTableValue())
-              return { table }
+              return { table, lastUpdated }
             }),
             'saveDatabase',
           ],
