@@ -11,7 +11,10 @@ const DIST_FILE_PATH = path.resolve(__dirname, 'dist')
 
 ;(async () => {
   try {
-    await fs.rmdir(DIST_FILE_PATH, { recursive: true })
+    try {
+      await fs.access(DIST_FILE_PATH);
+      await fs.rm(DIST_FILE_PATH, { recursive: true })
+    } catch (_) {}
 
     console.log('Minifying and copying js files...')
     const jsFiles = await fg([`${STATIC_FILE_PATH}/**/**.js`])
