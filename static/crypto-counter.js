@@ -1,5 +1,5 @@
 import { html } from './web_modules/htm/preact.js'
-import { useRef, useEffect } from './web_modules/preact/hooks.js' 
+import { useRef } from './web_modules/preact/hooks.js' 
 import css from './web_modules/csz.js'
 import { db } from './crypto-db.js'
 import { useMachine } from './web_modules/@xstate/react.js'
@@ -305,19 +305,7 @@ export function CryptoCounter() {
   })
   const { table, newRow, fetchPricesError, lastUpdated } = state.context
   const loading = state.matches('loadingPrices')
-  const keyInputElRef = useRef()
   const importTableBtnElRef = useRef()
-
-  useEffect(() => {
-    const to = setTimeout(() => {
-      if(keyInputElRef.current) {
-        keyInputElRef.current.focus()
-      }
-    }, 6)
-    return () => {
-      clearTimeout(to)
-    }
-  }, [table.rows.length])
 
   async function handleSaveNew(e) {
     e && e.preventDefault && e.preventDefault()
@@ -455,7 +443,6 @@ export function CryptoCounter() {
             <td className="marketcap-column">${newRow.marketcap}</td>
             <td className="key-input">
               <${KeyInput}
-                ref=${keyInputElRef}
                 onSaveNew=${handleSaveNew}
                 onInput=${(newKey) => {
                   send({ type: EDIT_NEW_ROW, mutation: { key: newKey } })
