@@ -12,21 +12,22 @@
     "postinstall": "node ./after-install.js"
   },
   "dependencies": {
-    "@xstate/react": "^1.3.3",
-    "clean-css": "^5.1.2",
-    "cross-env": "^7.0.3",
-    "csz": "^1.2.0",
-    "date-fns": "^2.22.1",
-    "ejs": "^3.1.6",
-    "fast-glob": "^3.2.5",
-    "fastify": "^3.15.1",
-    "fastify-static": "^4.2.0",
-    "htm": "^3.0.1",
-    "idb": "^6.1.0",
-    "preact": "^10.2.1",
+    "@xstate/react": "1.3.3",
+    "clean-css": "5.1.2",
+    "cross-env": "7.0.3",
+    "csz": "1.2.0",
+    "date-fns": "2.22.1",
+    "ejs": "3.1.6",
+    "fast-glob": "3.2.5",
+    "fastify": "3.15.1",
+    "fastify-static": "4.2.0",
+    "htm": "3.0.1",
+    "idb": "6.1.0",
+    "preact": "10.2.1",
+    "react": "npm:@pika/react",
     "snowpack": "1.7.1",
-    "uglify-js": "^3.13.6",
-    "xstate": "^4.19.1"
+    "uglify-js": "3.13.6",
+    "xstate": "4.19.1"
   },
   "snowpack": {
     "webDependencies": [
@@ -39,6 +40,7 @@
       "preact",
       "preact/hooks",
       "preact/compat",
+      "react",
       "xstate"
     ]
   }

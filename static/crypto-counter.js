@@ -549,7 +549,6 @@ export function CryptoCounter() {
                   <input
                     ref=${importTableBtnElRef}
                     type="file"
-                    value="upload"
                     onChange=${(event) => {
                       event.preventDefault()
                       const file = event.target.files[0]

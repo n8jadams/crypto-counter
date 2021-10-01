@@ -1,5 +1,5 @@
 # CryptoCounter
-A little PWA that helps you track your cryptocurrency portfolio with the help of the Coingecko API.
+A PWA that helps you track your cryptocurrency portfolio with the help of the Coingecko API.
 
 NOTE: This is just a fun little side project to help me learn how to write buildless preact sites, IndexedDB, and some of the nuances of iOS Safari and PWAs.
 
