@@ -5,9 +5,9 @@
   "license": "MIT",
   "scripts": {
     "dev": "cross-env ENV=development node --inspect ./server/server.js",
-    "start": "yarn build && cross-env ENV=production node ./server/server.js",
+    "start": "npm run build && cross-env ENV=production node ./server/server.js",
     "build": "node ./build.js",
-    "preinstall": "rm -rf ./static/web_modules",
+    "preinstall": "npx rimraf ./static/web_modules",
     "postinstall": "node ./after-install.js"
   },
   "dependencies": {
