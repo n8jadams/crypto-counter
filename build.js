@@ -3,11 +3,12 @@ const path = require('path')
 const fg = require('fast-glob')
 const CleanCSS = require('clean-css')
 const ejs = require('ejs')
+const normalize = require('normalize-path')
 
 const { getFileContents, minifyJs } = require('./node-utils.js')
 
-const STATIC_FILE_PATH = path.resolve(__dirname, 'static')
-const DIST_FILE_PATH = path.resolve(__dirname, 'dist')
+const STATIC_FILE_PATH = normalize(path.resolve(__dirname, 'static'))
+const DIST_FILE_PATH = normalize(path.resolve(__dirname, 'dist'))
 
 ;(async () => {
   try {
@@ -17,7 +18,7 @@ const DIST_FILE_PATH = path.resolve(__dirname, 'dist')
     } catch (_) {}
 
     console.log('Minifying and copying js files...')
-    const jsFiles = await fg([`${STATIC_FILE_PATH}/**/**.js`])
+    const jsFiles = await fg([normalize(`${STATIC_FILE_PATH}/**/**.js`)])
     await Promise.all(
       jsFiles.map(async (file) => {
         try {
@@ -40,7 +41,7 @@ const DIST_FILE_PATH = path.resolve(__dirname, 'dist')
     )
 
 		console.log('Minifying and copying css files...')
-    const cssFiles = await fg([`${STATIC_FILE_PATH}/**/**.css`])
+    const cssFiles = await fg([normalize(`${STATIC_FILE_PATH}/**/**.css`)])
     await Promise.all(
       cssFiles.map(async (file) => {
         try {
@@ -62,9 +63,8 @@ const DIST_FILE_PATH = path.resolve(__dirname, 'dist')
         }
       })
     )
-
     console.log('Copying the rest of the files...')
-    const restOfFiles = await fg([`${STATIC_FILE_PATH}/**/*.!(js|css)`])
+    const restOfFiles = await fg([normalize(`${STATIC_FILE_PATH}/**/*.!(js|css)`)])
     await Promise.all(
       restOfFiles.map(async (file) => {
         try {
@@ -84,7 +84,7 @@ const DIST_FILE_PATH = path.resolve(__dirname, 'dist')
     )
 
 		console.log('Compiling and building the service worker file...')
-		const fullStaticFiles = await fg([`${DIST_FILE_PATH}/**/**.*`])
+		const fullStaticFiles = await fg([normalize(`${DIST_FILE_PATH}/**/**.*`)])
 		const staticFiles = fullStaticFiles.map((file) => file.replace(DIST_FILE_PATH, ''))
 		const serviceWorkerTemplate = await getFileContents(path.resolve(__dirname, 'templates/service-worker-template.ejs'))
 		const serviceWorkerCode = ejs.render(serviceWorkerTemplate, {

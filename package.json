@@ -22,8 +22,9 @@
     "fastify-static": "4.2.0",
     "htm": "3.0.1",
     "idb": "6.1.0",
+    "normalize-path": "^3.0.0",
     "preact": "10.2.1",
-    "react": "npm:@pika/react",
+    "react": "npm:@pika/react@^16.13.1",
     "snowpack": "1.7.1",
     "uglify-js": "3.13.6",
     "xstate": "4.19.1"
