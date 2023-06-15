@@ -24,7 +24,7 @@ $ ngrok http 8081
 4. Grab the public https url of the site and download like you would any other PWA.
 	* On iOS: Open the page, expand the options, and click "Add to Home Screen". Open and close the newly added app a couple times on your phone.
 	* On Android: ??
-	* On desktop: I recommend using Firefox and [this extension](https://addons.mozilla.org/en-US/firefox/addon/firefoxpwa/).
+	* On desktop: I recommend using Firefox and [this extension](https://addons.mozilla.org/en-US/firefox/addon/pwas-for-firefox/).
 5. You can kill all of the scripts, everything is in place for the app to work offline.
 
 ## Todos
